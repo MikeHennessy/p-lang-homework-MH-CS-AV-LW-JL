@@ -20,19 +20,15 @@ fun firstThenLowerCase(strings: List<String>, condition: (String) -> Boolean): S
 class SayObject private constructor(private val words: List<String>) {
     val phrase: String
         get() = words.joinToString(" ")
-
     fun and(word: String): SayObject = SayObject(words + word)
-
     companion object {
         operator fun invoke(initial: String = ""): SayObject = SayObject(listOf(initial))
     }
 }
-
 fun say(initial: String = ""): SayObject = SayObject(initial)
 
 fun meaningfulLineCount(fileName: String): Long {
     var count = 0L
-
     FileReader(fileName).use { fileReader ->
         BufferedReader(fileReader).use { bufferedReader ->
             bufferedReader.forEachLine { line ->
@@ -61,7 +57,6 @@ data class Quaternion(val a: Double, val b: Double, val c: Double, val d: Double
         )
 
     fun coefficients() = listOf(a, b, c, d)
-
     fun conjugate() = Quaternion(a, -b, -c, -d)
 
     override fun toString(): String {
@@ -91,10 +86,9 @@ data class Quaternion(val a: Double, val b: Double, val c: Double, val d: Double
 }
 
 sealed interface BinarySearchTree {
+
     fun size(): Int
-
     fun contains(letter: String): Boolean
-
     fun insert(letter: String): BinarySearchTree
 
     companion object {
@@ -103,11 +97,8 @@ sealed interface BinarySearchTree {
 
     private object EmptyTree : BinarySearchTree {
         override fun size(): Int = 0
-
         override fun contains(letter: String): Boolean = false
-
         override fun insert(letter: String): BinarySearchTree = Node(letter, Empty, Empty)
-
         override fun toString(): String = "()"
     }
 

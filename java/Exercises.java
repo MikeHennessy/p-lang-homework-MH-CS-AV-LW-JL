@@ -30,7 +30,6 @@ public class Exercises {
 
     public interface SayObject {
         SayObject and(String next);
-
         String phrase();
     }
 
@@ -114,14 +113,18 @@ record Quaternion(double a, double b, double c, double d) {
     public String toString() {
         List<String> terms = new ArrayList<>();
 
-        if (a != 0.0)
+        if (a != 0.0) {
             terms.add(String.valueOf(a));
-        if (b != 0.0)
+        }
+        if (b != 0.0) {
             terms.add((b == 1.0 ? "" : b == -1.0 ? "-" : String.valueOf(b)) + "i");
-        if (c != 0.0)
+        }
+        if (c != 0.0) {
             terms.add((c == 1.0 ? "" : c == -1.0 ? "-" : String.valueOf(c)) + "j");
-        if (d != 0.0)
+        }
+        if (d != 0.0) {
             terms.add((d == 1.0 ? "" : d == -1.0 ? "-" : String.valueOf(d)) + "k");
+        }
 
         if (terms.isEmpty()) {
             return "0";
@@ -142,9 +145,7 @@ record Quaternion(double a, double b, double c, double d) {
 
 sealed interface BinarySearchTree permits Empty, Node {
     int size();
-
     boolean contains(String letter);
-
     BinarySearchTree insert(String letter);
 }
 

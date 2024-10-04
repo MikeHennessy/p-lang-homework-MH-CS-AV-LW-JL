@@ -29,7 +29,6 @@ struct Say {
     func and(_ word: String) -> Say {
         var newSay = self
         newSay.words.append(word)
-
         return newSay
     }
 
@@ -48,17 +47,12 @@ enum FileError: Error {
 }
 
 func meaningfulLineCount(_ filename: String) async -> Result<Int, Error> {
-
     do {
-
         let fileURL = URL(fileURLWithPath: filename)
-
         guard FileManager.default.fileExists(atPath: filename) else {
             return .failure(FileError.fileNotFound)
         }
-
         var lineCount = 0
-
         for try await line in fileURL.lines {
             let trimmedLine = line.trimmingCharacters(in: .whitespaces)
 
@@ -66,20 +60,14 @@ func meaningfulLineCount(_ filename: String) async -> Result<Int, Error> {
                 lineCount += 1
             }
         }
-
         return .success(lineCount)
-
     } catch {
-
         return .failure(FileError.failedToRead)
     }
 }
 
 struct Quaternion: CustomStringConvertible {
-    let a: Double
-    let b: Double
-    let c: Double
-    let d: Double
+    let a, b, c, d: Double
 
     init(a: Double? = 0, b: Double? = 0, c: Double? = 0, d: Double? = 0) {
         self.a = a ?? 0
@@ -93,12 +81,7 @@ struct Quaternion: CustomStringConvertible {
     }
 
     var conjugate: Quaternion {
-        return Quaternion(
-            a: a,
-            b: -b,
-            c: -c,
-            d: -d
-        )
+        return Quaternion(a: a, b: -b, c: -c, d: -d)
     }
 
     var description: String {
@@ -157,49 +140,24 @@ struct Quaternion: CustomStringConvertible {
     }
 
     static var ZERO: Quaternion {
-        return Quaternion(
-            a: 0,
-            b: 0,
-            c: 0,
-            d: 0
-        )
+        return Quaternion(a: 0, b: 0, c: 0, d: 0)
     }
 
     static var I: Quaternion {
-        return Quaternion(
-            a: 0,
-            b: 1,
-            c: 0,
-            d: 0
-        )
+        return Quaternion(a: 0, b: 1, c: 0, d: 0)
     }
 
     static var J: Quaternion {
-        return Quaternion(
-            a: 0,
-            b: 0,
-            c: 1,
-            d: 0
-        )
+        return Quaternion(a: 0, b: 0, c: 1, d: 0)
     }
 
     static var K: Quaternion {
-        return Quaternion(
-            a: 0,
-            b: 0,
-            c: 0,
-            d: 1
-        )
+        return Quaternion(a: 0, b: 0, c: 0, d: 1)
     }
 }
 
 func + (lhs: Quaternion, rhs: Quaternion) -> Quaternion {
-    return Quaternion(
-        a: lhs.a + rhs.a,
-        b: lhs.b + rhs.b,
-        c: lhs.c + rhs.c,
-        d: lhs.d + rhs.d
-    )
+    return Quaternion(a: lhs.a + rhs.a, b: lhs.b + rhs.b, c: lhs.c + rhs.c, d: lhs.d + rhs.d)
 }
 
 func * (lhs: Quaternion, rhs: Quaternion) -> Quaternion {
