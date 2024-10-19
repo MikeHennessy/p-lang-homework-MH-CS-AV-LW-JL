@@ -57,17 +57,83 @@ interface Box {
 export type Shape = Sphere | Box
 
 export function surfaceArea(shape: Shape): number {
-  return 0 // fix this
+  switch (shape.kind) {
+    case "Box":
+      return 2 * (shape.width * shape.height + shape.width * shape.depth + shape.height * shape.depth);
+    case "Sphere":
+      return 4 * Math.PI * Math.pow(shape.radius, 2);
+  }
 }
 
 export function volume(shape: Shape): number {
-  return 0 // fix this
+  switch (shape.kind) {
+    case "Box":
+      return shape.width * shape.height * shape.depth;
+    case "Sphere":
+      return (4 / 3) * Math.PI * Math.pow(shape.radius, 3);
+  }
+}
+
+export function shapeToString(shape: Shape): string {
+  switch (shape.kind) {
+    case "Box":
+      return `Box(width=${shape.width}, length=${shape.height}, depth=${shape.depth})`;
+    case "Sphere":
+      return `Sphere(radius=${shape.radius})`;
+  }
 }
 
 // Write your binary search tree implementation here
+
+// singleton?
+
+interface Comparable<T> {
+  compareTo(other: T): number;
+}
 export interface BinarySearchTree<T> {
   size(): number
   isGeneratorFunction(value: T): BinarySearchTree<T>
   contains(value: T): boolean
   inorder(): Iterable<T>
 }
+
+class Empty<T extends Comparable<T>> implements BinarySearchTree<T> {
+  insert(value: T): BinarySearchTree<T> {
+    return new Node(value, new Empty(), new Empty());
+  }
+
+
+  contains(_: T): boolean {
+    return false;
+  }
+
+
+  size(): number {
+    return 0;
+  }
+
+  // returns nothing
+  *inorder(): IterableIterator<T> {}
+
+
+
+  toString(): string {
+    return "()";
+  }
+}
+
+class Node<T extends Comparable<T>> implements BinarySearchTree<T> {
+  constructor(
+    private readonly value: T,
+    private readonly left: BinarySearchTree<T>,
+    private readonly right: BinarySearchTree<T>
+  ) {}
+
+  insert(value: T): BinarySearchTree<T> {
+  }
+
+  contains(value: T): boolean {}
+
+  size(): number {}
+
+  *inorder(): IterableIterator<T> {}
