@@ -81,7 +81,7 @@ export function shapeToString(shape: Shape): string {
   }
 }
 
-// singleton?
+// singleton? 
 
 interface Comparable<T> {
   compareTo(other: T): number;
