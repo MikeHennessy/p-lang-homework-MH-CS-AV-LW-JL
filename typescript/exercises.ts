@@ -13,11 +13,11 @@ export function change(amount: bigint): Map<bigint, bigint> {
   return counts
 }
 
-export function firstThenApply<T, U>(
-  items: T[],
-  predicate: (item: T) => boolean,
-  consumer: (item: T) => U
-): U | undefined {
+export function firstThenApply<InputType, OutputType>(
+  items: InputType[],
+  predicate: (item: InputType) => boolean,
+  consumer: (item: InputType) => OutputType
+): OutputType | undefined {
   const foundItem = items.find(predicate);
   return foundItem !== undefined ? consumer(foundItem) : undefined;
 }
@@ -28,7 +28,6 @@ export function* powersGenerator(base: bigint): Generator<bigint> {
   }
 }
 
-// Write your line count function here
 export async function meaningfulLineCount(filename: string): Promise<number> {
   let count = 0;
   const file = await open(filename, "r")
@@ -41,7 +40,6 @@ export async function meaningfulLineCount(filename: string): Promise<number> {
   return count
 }
 
-// Write your shape type and associated functions here
 interface Sphere {
   kind: "Sphere"
   radius: number
@@ -82,8 +80,6 @@ export function shapeToString(shape: Shape): string {
       return `Sphere(radius=${shape.radius})`;
   }
 }
-
-// Write your binary search tree implementation here
 
 // singleton?
 
