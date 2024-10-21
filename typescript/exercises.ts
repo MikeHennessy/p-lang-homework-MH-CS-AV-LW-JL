@@ -90,36 +90,26 @@ export function shapeToString(shape: Shape): string {
 interface Comparable<T> {
   compareTo(other: T): number;
 }
-export interface BinarySearchTree<T> {
-  size(): number
-  isGeneratorFunction(value: T): BinarySearchTree<T>
-  contains(value: T): boolean
-  inorder(): Iterable<T>
+interface BinarySearchTree<T extends Comparable<T>> {
+  insert(value: T): BinarySearchTree<T>;
+  contains(value: T): boolean;
+  size(): number;
+  inorder(): IterableIterator<T>;
 }
-
 class Empty<T extends Comparable<T>> implements BinarySearchTree<T> {
+  static instance = new Empty<any>();
+
   insert(value: T): BinarySearchTree<T> {
-    return new Node(value, new Empty(), new Empty());
+    return new Node(value, Empty.instance, Empty.instance);
   }
 
+  contains(_: T): boolean { return false; }
 
-  contains(_: T): boolean {
-    return false;
-  }
+  size(): number { return 0; }
 
-
-  size(): number {
-    return 0;
-  }
-
-  // returns nothing
   *inorder(): IterableIterator<T> {}
 
-
-
-  toString(): string {
-    return "()";
-  }
+  toString(): string { return "()"; }
 }
 
 class Node<T extends Comparable<T>> implements BinarySearchTree<T> {
@@ -130,10 +120,46 @@ class Node<T extends Comparable<T>> implements BinarySearchTree<T> {
   ) {}
 
   insert(value: T): BinarySearchTree<T> {
+    if (value.compareTo(this.value) < 0) {
+      return new Node(this.value, this.left.insert(value), this.right);
+    } else if (value.compareTo(this.value) > 0) {
+      return new Node(this.value, this.left, this.right.insert(value));
+    }
+    return this; 
   }
 
-  contains(value: T): boolean {}
+  contains(value: T): boolean {
+    if (value.compareTo(this.value) < 0) {
+      return this.left.contains(value);
+    } else if (value.compareTo(this.value) > 0) {
+      return this.right.contains(value);
+    }
+    return true;
+  }
 
-  size(): number {}
+  size(): number {
+    return 1 + this.left.size() + this.right.size();
+  }
 
-  *inorder(): IterableIterator<T> {}
+  *inorder(): IterableIterator<T> {
+    yield* this.left.inorder();
+    yield this.value;
+    yield* this.right.inorder();
+  }
+
+  toString(): string {
+    return `(${this.left}${this.value}${this.right})`;
+  }
+}
+
+class ComparableString implements Comparable<ComparableString> {
+  constructor(private readonly str: string) {}
+
+  compareTo(other: ComparableString): number {
+    return this.str.localeCompare(other.str);
+  }
+
+  toString(): string {
+    return this.str;
+  }
+}
