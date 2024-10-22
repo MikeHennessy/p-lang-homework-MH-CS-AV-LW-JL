@@ -57,7 +57,8 @@ let volume shape =
 let surface_area shape = 
   match shape with
   | Sphere radius -> 4. *. Float.pi *. (radius ** 2.)
-  | Box (length, width, height) -> 2. *. (width *. length +. height *. length +. height *. width)
+  | Box (length, width, height) -> 
+    2. *. (width *. length +. height *. length +. height *. width)
 
 type 'a binary_search_tree =
   | Empty
