@@ -3,6 +3,9 @@ module Exercises
     firstThenApply,
     powers,
     meaningfulLineCount,
+    volume, 
+    surfaceArea, 
+    Shape(..),
   )
 where
 
@@ -51,6 +54,17 @@ startsWithHash :: String -> Bool
 startsWithHash [] = False
 startsWithHash (x : _) = x == '#'
 
--- Write your shape data type here
+data Shape
+  = Sphere Double
+  | Box Double Double Double
+  deriving(Eq, Show)
+
+surfaceArea :: Shape -> Double
+surfaceArea (Sphere r) = 4.0 * pi * r * r
+surfaceArea (Box l w h) = 2.0 * ((l*w) + (l*h) + (w*h))
+
+volume :: Shape -> Double
+volume (Sphere r) = (4.0 / 3.0) * pi * r * r * r
+volume (Box l w h) = l * w * h
 
 -- Write your binary search tree algebraic type here
