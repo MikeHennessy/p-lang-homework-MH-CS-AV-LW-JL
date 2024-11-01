@@ -100,5 +100,15 @@ inorder Empty = []
 inorder (Node left x right) = inorder left ++ [x] ++ inorder right
 
 instance Show a => Show (BST a) where
- show Empty = ""
- show (Node left x right) = "(" ++ show left ++ show x ++ show right ++ ")"
+    show Empty = "()"
+    show (Node left val right) = "(" ++ clean showLeft ++ clean showVal ++ clean showRight ++ ")"
+      where
+        showVal = show val
+        showLeft = case left of
+                     Empty -> ""
+                     _     -> show left
+        showRight = case right of
+                      Empty -> ""
+                      _     -> show right
+                      
+        clean = filter (not . isSpace)
