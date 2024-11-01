@@ -6,6 +6,11 @@ module Exercises
     volume, 
     surfaceArea, 
     Shape(..),
+    insert,
+    contains,
+    size,
+    inorder,
+    BST(..)
   )
 where
 
@@ -67,4 +72,33 @@ volume :: Shape -> Double
 volume (Sphere r) = (4.0 / 3.0) * pi * r * r * r
 volume (Box l w h) = l * w * h
 
--- Write your binary search tree algebraic type here
+data BST a 
+  = Empty 
+  | Node (BST a) a (BST a) 
+  deriving (Eq)
+
+insert :: (Ord a) => a -> BST a -> BST a
+insert x Empty = Node Empty x Empty
+insert x (Node left val right)
+  | x < val = Node (insert x left) val right
+  | x > val = Node left val (insert x right)
+  | otherwise = Node left val right
+
+contains :: (Ord a) => a -> BST a -> Bool
+contains _ Empty = False
+contains x (Node left val right)
+  | x < val   = contains x left
+  | x > val   = contains x right
+  | otherwise = True
+
+size :: BST a -> Int
+size Empty = 0
+size (Node left _ right) = 1 + size left + size right
+
+inorder :: BST a -> [a]
+inorder Empty = []
+inorder (Node left x right) = inorder left ++ [x] ++ inorder right
+
+instance Show a => Show (BST a) where
+ show Empty = ""
+ show (Node left x right) = "(" ++ show left ++ show x ++ show right ++ ")"
