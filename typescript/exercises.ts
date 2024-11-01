@@ -50,7 +50,7 @@ interface Sphere {
 interface Box {
   kind: "Box"
   width: number
-  height: number
+  length: number
   depth: number
 }
 
@@ -59,7 +59,7 @@ export type Shape = Sphere | Box
 export function surfaceArea(shape: Shape): number {
   switch (shape.kind) {
     case "Box":
-      return 2 * (shape.width * shape.height + shape.width * shape.depth + shape.height * shape.depth);
+      return 2 * (shape.width * shape.length + shape.width * shape.depth + shape.length * shape.depth);
     case "Sphere":
       return 4 * Math.PI * Math.pow(shape.radius, 2);
   }
@@ -68,7 +68,7 @@ export function surfaceArea(shape: Shape): number {
 export function volume(shape: Shape): number {
   switch (shape.kind) {
     case "Box":
-      return shape.width * shape.height * shape.depth;
+      return shape.width * shape.length * shape.depth;
     case "Sphere":
       return (4 / 3) * Math.PI * Math.pow(shape.radius, 3);
   }
@@ -77,7 +77,7 @@ export function volume(shape: Shape): number {
 export function shapeToString(shape: Shape): string {
   switch (shape.kind) {
     case "Box":
-      return `Box(width=${shape.width}, length=${shape.height}, depth=${shape.depth})`;
+      return `Box(width=${shape.width}, length=${shape.length}, depth=${shape.depth})`;
     case "Sphere":
       return `Sphere(radius=${shape.radius})`;
   }
@@ -85,81 +85,82 @@ export function shapeToString(shape: Shape): string {
 
 // Write your binary search tree implementation here
 
-// singleton?
+export class Empty<T> {
+  readonly isEmpty = true;
 
-interface Comparable<T> {
-  compareTo(other: T): number;
-}
-interface BinarySearchTree<T extends Comparable<T>> {
-  insert(value: T): BinarySearchTree<T>;
-  contains(value: T): boolean;
-  size(): number;
-  inorder(): IterableIterator<T>;
-}
-class Empty<T extends Comparable<T>> implements BinarySearchTree<T> {
-  static instance = new Empty<any>();
+  private static _instance: Empty<any> = new Empty();
 
-  insert(value: T): BinarySearchTree<T> {
-    return new Node(value, Empty.instance, Empty.instance);
+  constructor() {
+    if (Empty._instance) {
+      return Empty._instance;
+    }
+    Empty._instance = this;
   }
 
-  contains(_: T): boolean { return false; }
+  insert(letter: T): Node<T> {
+    return new Node(letter, new Empty<T>(), new Empty<T>());
+  }
 
-  size(): number { return 0; }
+  contains(letter: T): boolean {
+    return false;
+  }
 
-  *inorder(): IterableIterator<T> {}
+  size(): number {
+    return 0;
+  }
 
-  toString(): string { return "()"; }
+  *inorder(): Generator<T> {}
+
+  toString(): string {
+    return "()"; 
+  }
 }
 
-class Node<T extends Comparable<T>> implements BinarySearchTree<T> {
+export class Node<T> {
+  readonly isEmpty = false;
+
   constructor(
-    private readonly value: T,
-    private readonly left: BinarySearchTree<T>,
-    private readonly right: BinarySearchTree<T>
+    public readonly letter: T,
+    public readonly left: BinarySearchTree<T>,
+    public readonly right: BinarySearchTree<T>
   ) {}
 
-  insert(value: T): BinarySearchTree<T> {
-    if (value.compareTo(this.value) < 0) {
-      return new Node(this.value, this.left.insert(value), this.right);
-    } else if (value.compareTo(this.value) > 0) {
-      return new Node(this.value, this.left, this.right.insert(value));
+  insert(letter: T): Node<T> {
+    if (letter < this.letter) {
+      return new Node(this.letter, this.left.insert(letter), this.right);
+    } else if (letter > this.letter) {
+      return new Node(this.letter, this.left, this.right.insert(letter));
     }
     return this; 
   }
 
-  contains(value: T): boolean {
-    if (value.compareTo(this.value) < 0) {
-      return this.left.contains(value);
-    } else if (value.compareTo(this.value) > 0) {
-      return this.right.contains(value);
+  contains(letter: T): boolean {
+    if (letter === this.letter) {
+      return true;
+    } else if (letter < this.letter) {
+      return this.left.contains(letter);
+    } else {
+      return this.right.contains(letter);
     }
-    return true;
   }
 
   size(): number {
     return 1 + this.left.size() + this.right.size();
   }
 
-  *inorder(): IterableIterator<T> {
+  *inorder(): Generator<T> {
     yield* this.left.inorder();
-    yield this.value;
+    yield this.letter;
     yield* this.right.inorder();
   }
 
   toString(): string {
-    return `(${this.left}${this.value}${this.right})`;
+    const leftStr = this.left.isEmpty ? "" : this.left.toString();
+    const rightStr = this.right.isEmpty ? "" : this.right.toString();
+    return `(${leftStr}${this.letter}${rightStr})`;
   }
 }
 
-class ComparableString implements Comparable<ComparableString> {
-  constructor(private readonly str: string) {}
+export type BinarySearchTree<T> = Node<T> | Empty<T>;
 
-  compareTo(other: ComparableString): number {
-    return this.str.localeCompare(other.str);
-  }
-
-  toString(): string {
-    return this.str;
-  }
-}
+export const emptyTree = <T>(): BinarySearchTree<T> => new Empty<T>();
