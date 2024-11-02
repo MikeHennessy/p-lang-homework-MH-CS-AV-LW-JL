@@ -65,12 +65,12 @@ data Shape
   deriving(Eq, Show)
 
 surfaceArea :: Shape -> Double
-surfaceArea (Sphere r) = 4.0 * pi * r * r
-surfaceArea (Box l w h) = 2.0 * ((l*w) + (l*h) + (w*h))
+surfaceArea (Sphere radius) = 4.0 * pi * radius * radius
+surfaceArea (Box length width height) = 2.0 * ((length*width) + (length*height) + (width*height))
 
 volume :: Shape -> Double
-volume (Sphere r) = (4.0 / 3.0) * pi * r * r * r
-volume (Box l w h) = l * w * h
+volume (Sphere radius) = (4.0 / 3.0) * pi * radius * radius * radius
+volume (Box length width height) = length * width * height
 
 data BST a 
   = Empty 
