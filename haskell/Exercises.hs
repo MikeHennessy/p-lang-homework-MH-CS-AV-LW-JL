@@ -3,6 +3,14 @@ module Exercises
     firstThenApply,
     powers,
     meaningfulLineCount,
+    volume, 
+    surfaceArea, 
+    Shape(..),
+    insert,
+    contains,
+    size,
+    inorder,
+    BST(..)
   )
 where
 
@@ -51,6 +59,56 @@ startsWithHash :: String -> Bool
 startsWithHash [] = False
 startsWithHash (x : _) = x == '#'
 
--- Write your shape data type here
+data Shape
+  = Sphere Double
+  | Box Double Double Double
+  deriving(Eq, Show)
 
--- Write your binary search tree algebraic type here
+surfaceArea :: Shape -> Double
+surfaceArea (Sphere radius) = 4.0 * pi * radius * radius
+surfaceArea (Box length width height) = 2.0 * ((length*width) + (length*height) + (width*height))
+
+volume :: Shape -> Double
+volume (Sphere radius) = (4.0 / 3.0) * pi * radius * radius * radius
+volume (Box length width height) = length * width * height
+
+data BST a 
+  = Empty 
+  | Node (BST a) a (BST a) 
+  deriving (Eq)
+
+insert :: (Ord a) => a -> BST a -> BST a
+insert x Empty = Node Empty x Empty
+insert x (Node left val right)
+  | x < val = Node (insert x left) val right
+  | x > val = Node left val (insert x right)
+  | otherwise = Node left val right
+
+contains :: (Ord a) => a -> BST a -> Bool
+contains _ Empty = False
+contains x (Node left val right)
+  | x < val   = contains x left
+  | x > val   = contains x right
+  | otherwise = True
+
+size :: BST a -> Int
+size Empty = 0
+size (Node left _ right) = 1 + size left + size right
+
+inorder :: BST a -> [a]
+inorder Empty = []
+inorder (Node left x right) = inorder left ++ [x] ++ inorder right
+
+instance Show a => Show (BST a) where
+    show Empty = "()"
+    show (Node left val right) = "(" ++ clean showLeft ++ clean showVal ++ clean showRight ++ ")"
+      where
+        showVal = show val
+        showLeft = case left of
+                     Empty -> ""
+                     _     -> show left
+        showRight = case right of
+                      Empty -> ""
+                      _     -> show right
+                      
+        clean = filter (not . isSpace)

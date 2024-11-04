@@ -65,11 +65,11 @@ describe("The firstThenApply function", () => {
       "abcd"
     )
     deepEqual(
-      firstThenApply([1, 2, 3], (n: number) => n > 1, square),
+      firstThenApply([1, 2, 3], (n) => n > 1, square),
       4
     )
     deepEqual(
-      firstThenApply([1, 2, 3], (n: number) => n > 3, square),
+      firstThenApply([1, 2, 3], (n) => n > 3, square),
       undefined
     )
   })
@@ -106,77 +106,68 @@ describe("The meaningfulLineCount function", async () => {
 })
 
 describe("The shape functions", () => {
-  const sphere: Shape = { kind: "Sphere", radius: 5 };
-  const box: Shape = { kind: "Box", width: 3, length: 4, depth: 5 };
-
+  const sphere: Shape = { kind: "Sphere", radius: 5 }
+  const box: Shape = { kind: "Box", width: 3, length: 4, depth: 5 }
   it("calculates volumes correctly", () => {
-    deepEqual(volume(sphere), 523.5987755982989);
-    deepEqual(volume(box), 60);
-  });
-
+    deepEqual(volume(sphere), 523.5987755982989)
+    deepEqual(volume(box), 60)
+  })
   it("calculates surface areas correctly", () => {
-    deepEqual(surfaceArea(sphere), 314.1592653589793);
-    deepEqual(surfaceArea(box), 94);
-  });
-});
+    deepEqual(surfaceArea(sphere), 314.1592653589793)
+    deepEqual(surfaceArea(box), 94)
+  })
+})
 
 describe("The BinarySearchTree class", () => {
-  let t: BinarySearchTree<ComparableString>;
-
+  let t: BinarySearchTree<string>
   it("starts empty", () => {
-    t = new Empty();
-    deepEqual(t.size(), 0);
-    deepEqual(t.contains(new ComparableString("A")), false);
-    deepEqual(`${t}`, "()");
-  });
-
+    t = new Empty()
+    deepEqual(t.size(), 0)
+    deepEqual(t.contains("A"), false)
+    deepEqual(`${t}`, "()")
+  })
   it("can insert elements", () => {
-    t = t.insert(new ComparableString("G"));
-    deepEqual(t.size(), 1);
-    deepEqual(t.contains(new ComparableString("G")), true);
-    deepEqual(t.contains(new ComparableString("A")), false);
-    deepEqual(`${t}`, "(G)");
-    t = t.insert(new ComparableString("B"));
-    deepEqual(`${t}`, "((B)G)");
-    t = t.insert(new ComparableString("D"));
-    deepEqual(`${t}`, "((B(D))G)");
-    t = t.insert(new ComparableString("H"));
-    deepEqual(`${t}`, "((B(D))G(H))");
-    t = t.insert(new ComparableString("A"));
-    deepEqual(`${t}`, "(((A)B(D))G(H))");
-    t = t.insert(new ComparableString("C"));
-    t = t.insert(new ComparableString("J"));
-    deepEqual(t.size(), 7);
-    deepEqual(t.contains(new ComparableString("J")), true);
-    deepEqual(t.contains(new ComparableString("Z")), false);
-    deepEqual(`${t}`, "(((A)B((C)D))G(H(J)))");
-  });
-
+    t = t.insert("G")
+    deepEqual(t.size(), 1)
+    deepEqual(t.contains("G"), true)
+    deepEqual(t.contains("A"), false)
+    deepEqual(`${t}`, "(G)")
+    t = t.insert("B")
+    deepEqual(`${t}`, "((B)G)")
+    t = t.insert("D")
+    deepEqual(`${t}`, "((B(D))G)")
+    t = t.insert("H")
+    deepEqual(`${t}`, "((B(D))G(H))")
+    t = t.insert("A")
+    deepEqual(`${t}`, "(((A)B(D))G(H))")
+    t = t.insert("C")
+    t = t.insert("J")
+    deepEqual(t.size(), 7)
+    deepEqual(t.contains("J"), true)
+    deepEqual(t.contains("Z"), false)
+    deepEqual(`${t}`, "(((A)B((C)D))G(H(J)))")
+  })
   it("is immutable", () => {
-    let t2 = t;
-    t2 = t2.insert(new ComparableString("F"));
-    deepEqual(t2.size(), 8);
-    deepEqual(t.size(), 7);
-  });
-
+    let t2 = t
+    t2 = t2.insert("F")
+    deepEqual(t2.size(), 8)
+    deepEqual(t.size(), 7)
+  })
   it("can iterate in order", () => {
-    deepEqual([...t.inorder()].map(x => x.toString()), ["A", "B", "C", "D", "G", "H", "J"]);
-    let t2: BinarySearchTree<ComparableString> = new Empty();
-    deepEqual([...t2.inorder()], []);
-    t2 = t2.insert(new ComparableString("5"));
-    deepEqual([...t2.inorder()].map(x => x.toString()), ["5"]);
-    t2 = t2.insert(new ComparableString("3"));
-    t2 = t2.insert(new ComparableString("8"));
-    deepEqual([...t2.inorder()].map(x => x.toString()), ["3", "5", "8"]);
-  });
-
+    deepEqual([...t.inorder()], ["A", "B", "C", "D", "G", "H", "J"])
+    let t2: BinarySearchTree<number> = new Empty()
+    deepEqual([...t2.inorder()], [])
+    t2 = t2.insert(5)
+    deepEqual([...t2.inorder()], [5])
+    t2 = t2.insert(3)
+    t2 = t2.insert(8)
+    deepEqual([...t2.inorder()], [3, 5, 8]) 
+  })
   it("ignores insertions if values are already present", () => {
-    let t: BinarySearchTree<Comparable<boolean>> = new Empty();
-    const trueComparable: Comparable<boolean> = { compareTo: (b: boolean) => (b === true ? 1 : -1), toString: () => "true" };
-    const falseComparable: Comparable<boolean> = { compareTo: (b: boolean) => (b === false ? -1 : 1), toString: () => "false" };
-    t = t.insert(trueComparable);
-    t = t.insert(falseComparable);
-    t = t.insert(trueComparable);
-    deepEqual(t.size(), 2);
-  });
-});
+    let t: BinarySearchTree<boolean> = new Empty()
+    t = t.insert(true)
+    t = t.insert(false)
+    t = t.insert(true)
+    deepEqual(t.size(), 2)
+  })
+})
