@@ -52,7 +52,7 @@ response_code push(stack s, char* item) {
         }
         char** new_elements = realloc(
             s->elements, new_capacity * sizeof(char*)
-            );
+        );
         if (new_elements == NULL) {
             return out_of_memory;
         }
@@ -75,7 +75,7 @@ string_response pop(stack s) {
     if (new_capacity < s->capacity) {
         char** new_elements = realloc(
             s->elements, new_capacity * sizeof(char*)
-            );
+        );
         if (new_elements == NULL) {
             free(popped);
             return (string_response){out_of_memory, NULL};
