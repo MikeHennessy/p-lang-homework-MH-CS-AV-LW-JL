@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITIAL_CAPACITY 16
+static const int INITIAL_CAPACITY = 16;
 
 struct _Stack {
     char** elements;
@@ -87,7 +87,7 @@ string_response pop(stack s) {
 }
 
 void destroy(stack* s) {
-    if (s == NULL || *s == NULL) {
+    if (!s || !*s) {
         return;
     }
     for (int i = 0; i < (*s)->top; i++) {
