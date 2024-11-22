@@ -4,8 +4,8 @@
 #include <algorithm>
 using namespace std;
 
-#define MAX_CAPACITY 32768
-#define INITIAL_CAPACITY 16
+const int MAX_CAPACITY = 32768;
+const int INITIAL_CAPACITY = 16;
 
 template <typename T>
 class Stack {
