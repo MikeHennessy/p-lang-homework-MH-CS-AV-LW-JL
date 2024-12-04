@@ -11,7 +11,7 @@ import (
 
 // A little utility that simulates performing a task for a random duration.
 func do(seconds int, action string, rng *rand.Rand) {
-	log.Println(action) // This will include the timestamp automatically
+	log.Println(action)
 	randomMillis := 500*seconds + rng.Intn(500*seconds)
 	time.Sleep(time.Duration(randomMillis) * time.Millisecond)
 }
@@ -28,10 +28,11 @@ type Cook struct {
 	name string
 	busy bool
 	mu   sync.Mutex
+	startingWork bool
 }
 
-var nextId atomic.Uint64          // Global atomic counter for meal IDs
-var waiter = make(chan *Order, 3) // Waiter can hold only 3 orders at a time
+var nextId atomic.Uint64
+var waiter = make(chan *Order, 3)
 
 // NewOrder creates a new order with a unique ID.
 func NewOrder(customer string) *Order {
@@ -45,65 +46,63 @@ func NewOrder(customer string) *Order {
 }
 
 // customerEnters simulates a customer entering the restaurant, placing orders, and eating.
-func customerEnters(customer string, wg *sync.WaitGroup, mealsEaten *int32) {
-	defer wg.Done()
+func customerEnters(customer string, waitingGroup *sync.WaitGroup, mealsEaten *int32) {
+	defer waitingGroup.Done()
 
 	// Continue placing orders until 5 meals have been eaten
 	for {
-		if *mealsEaten >= 5 { // Check if the customer has eaten 5 meals
-			log.Printf("%s has eaten 5 meals and is heading home...\n", customer)
-			return // Stop placing orders when 5 meals are eaten
+		if *mealsEaten >= 5 {
+			log.Printf("%s going home \n", customer)
+			return
 		}
-
-		log.Printf("%s has entered the restaurant and is waiting to place an order...\n", customer)
 
 		// Create a new order for the customer
 		order := NewOrder(customer)
 
 		// Try placing the order with the waiter
 		select {
-		case waiter <- order: // If the waiter has space, the order is placed
-			log.Printf("%s has placed order ID %d and is now waiting...\n", customer, order.id)
+		case waiter <- order:
+			log.Printf("%s placed order %d \n", customer, order.id)
 			// Wait for the meal to be prepared
 			meal := <-order.reply
 			// Simulate eating the meal
-			do(2, fmt.Sprintf("%s is eating meal ID %d", customer, meal.id), rand.New(rand.NewSource(time.Now().UnixNano())))
-			atomic.AddInt32(mealsEaten, 1) // Increment meals eaten count
-		case <-time.After(7 * time.Second): // Wait for at most 7 seconds
+			do(2, fmt.Sprintf("%s eating cooked order %d prepared by %s", customer, meal.id, order.preparedBy), rand.New(rand.NewSource(time.Now().UnixNano())))
+			atomic.AddInt32(mealsEaten, 1)
+		case <-time.After(7 * time.Second):
 			// Customer waited too long and is leaving, will come back later
-			do(5, fmt.Sprintf("%s waited too long and is leaving... Customer comes back later.", customer), rand.New(rand.NewSource(time.Now().UnixNano())))
-			time.Sleep(time.Duration(rand.Intn(2500)+2500) * time.Millisecond) // Customer waits 2.5 - 5 seconds before coming back
+			do(5, fmt.Sprintf("%s waiting too long, abandoning order %d", customer, order.id), rand.New(rand.NewSource(time.Now().UnixNano())))
+			time.Sleep(time.Duration(rand.Intn(2500)+2500) * time.Millisecond)
 		}
 	}
 }
 
 // prepareOrder simulates a cook preparing an order.
-func prepareOrder(c *Cook) {
+func prepareOrder(cook *Cook) {
 	for order := range waiter {
-		c.mu.Lock()
-		if !c.busy {
-			c.busy = true
-			c.mu.Unlock()
+		cook.mu.Lock()
+		if !cook.busy {
+			cook.busy = true
+			cook.mu.Unlock()
 
 			// Simulate cooking time
-			do(10, fmt.Sprintf("%s is cooking order ID %d", c.name, order.id), rand.New(rand.NewSource(time.Now().UnixNano())))
+			do(10, fmt.Sprintf("%s cooking order %d for %s", cook.name, order.id, order.customer), rand.New(rand.NewSource(time.Now().UnixNano())))
 
 			// Mark cook as not busy and deliver the meal to the customer
-			c.mu.Lock()
-			c.busy = false
-			c.mu.Unlock()
+			cook.mu.Lock()
+			cook.busy = false
+			cook.mu.Unlock()
 
 			order.preparedBy = c.name
 			order.reply <- order
 		} else {
-			c.mu.Unlock()
+			cook.mu.Unlock()
 		}
 	}
 }
 
 func main() {
+	var waitingGroup sync.WaitGroup
 
-	var wg sync.WaitGroup
 	// List of customers
 	customerNames := []string{"Ani", "Bai", "Cat", "Dao", "Eve", "Fay", "Gus", "Hua", "Iza", "Jai"}
 
@@ -113,8 +112,8 @@ func main() {
 	// Start customer goroutines
 	for _, customer := range customerNames {
 		mealsEaten[customer] = new(int32)
-		wg.Add(1)
-		go customerEnters(customer, &wg, mealsEaten[customer])
+		waitingGroup.Add(1)
+		go customerEnters(customer, &waitingGroup, mealsEaten[customer])
 	}
 
 	// Start 3 cook goroutines
@@ -125,10 +124,11 @@ func main() {
 	}
 
 	for _, cook := range cooks {
+		log.Printf("%s starting work", cook.name)
 		go prepareOrder(&cook)
 	}
 
 	// Wait for all customers to finish
-	wg.Wait()
-	log.Println("All customers have finished eating and gone home. Restaurant is shutting down.")
+	waitingGroup.Wait()
+	log.Println("Restaurant closing")
 }
