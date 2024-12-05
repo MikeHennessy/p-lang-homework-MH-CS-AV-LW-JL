@@ -23,9 +23,9 @@ type Order struct {
 }
 
 type Cook struct {
-	name string
-	busy bool
-	mu   sync.Mutex
+	name         string
+	busy         bool
+	mu           sync.Mutex
 	startingWork bool
 }
 
