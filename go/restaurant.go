@@ -26,6 +26,7 @@ type Cook struct {
 	name string
 	busy bool
 	mu   sync.Mutex
+	startingWork bool
 }
 
 var nextId atomic.Uint64
@@ -45,56 +46,52 @@ func customerEnters(customer string, customers *sync.WaitGroup, mealsEaten *int3
 
 	for {
 		if *mealsEaten >= 5 {
-			log.Printf("%s has eaten 5 meals and is heading home...\n", customer)
+			log.Printf("%s going home \n", customer)
 			return
 		}
-
-		log.Printf("%s has entered the restaurant and is waiting to place an order...\n", customer)
 
 		order := NewOrder(customer)
 
 		select {
 		case waiter <- order:
-			log.Printf("%s has placed order ID %d and is now waiting...\n", customer, order.id)
+			log.Printf("%s placed order %d \n", customer, order.id)
 			meal := <-order.reply
-			do(2, fmt.Sprintf("%s is eating meal ID %d", customer, meal.id), rand.New(rand.NewSource(time.Now().UnixNano())))
+			do(2, fmt.Sprintf("%s eating cooked order %d prepared by %s", customer, meal.id, order.preparedBy), rand.New(rand.NewSource(time.Now().UnixNano())))
 			atomic.AddInt32(mealsEaten, 1)
 		case <-time.After(7 * time.Second):
-			do(5, fmt.Sprintf("%s waited too long and is leaving... Customer comes back later.", customer), rand.New(rand.NewSource(time.Now().UnixNano())))
+			do(5, fmt.Sprintf("%s waiting too long, abandoning order %d", customer, order.id), rand.New(rand.NewSource(time.Now().UnixNano())))
 			time.Sleep(time.Duration(rand.Intn(2500)+2500) * time.Millisecond)
 		}
 	}
 }
 
-func prepareOrder(chef *Cook) {
+func prepareOrder(cook *Cook) {
 	for order := range waiter {
-		chef.mu.Lock()
-		if !chef.busy {
-			chef.busy = true
-			chef.mu.Unlock()
-			do(10, fmt.Sprintf("%s is cooking order ID %d", chef.name, order.id), rand.New(rand.NewSource(time.Now().UnixNano())))
-			chef.mu.Lock()
-			chef.busy = false
-			chef.mu.Unlock()
-			order.preparedBy = chef.name
+		cook.mu.Lock()
+		if !cook.busy {
+			cook.busy = true
+			cook.mu.Unlock()
+			do(10, fmt.Sprintf("%s cooking order %d for %s", cook.name, order.id, order.customer), rand.New(rand.NewSource(time.Now().UnixNano())))
+			cook.mu.Lock()
+			cook.busy = false
+			cook.mu.Unlock()
+			order.preparedBy = cook.name
 			order.reply <- order
 		} else {
-			chef.mu.Unlock()
+			cook.mu.Unlock()
 		}
 	}
 }
 
 func main() {
-
-	var customers sync.WaitGroup
+	var waitingGroup sync.WaitGroup
 	customerNames := []string{"Ani", "Bai", "Cat", "Dao", "Eve", "Fay", "Gus", "Hua", "Iza", "Jai"}
-
 	mealsEaten := make(map[string]*int32)
 
 	for _, customer := range customerNames {
 		mealsEaten[customer] = new(int32)
-		customers.Add(1)
-		go customerEnters(customer, &customers, mealsEaten[customer])
+		waitingGroup.Add(1)
+		go customerEnters(customer, &waitingGroup, mealsEaten[customer])
 	}
 
 	cooks := []Cook{
@@ -104,8 +101,9 @@ func main() {
 	}
 
 	for _, cook := range cooks {
+		log.Printf("%s starting work", cook.name)
 		go prepareOrder(&cook)
 	}
-	customers.Wait()
-	log.Println("All customers have finished eating and gone home. Restaurant is shutting down.")
+	waitingGroup.Wait()
+	log.Println("Restaurant closing")
 }
